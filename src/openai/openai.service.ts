@@ -88,7 +88,6 @@ export class OpenaiService {
 //   };
 // }
 
-//new function
 async handleUserMessage(content: string, threadId?: number) {
   // 1️⃣ Get or create thread
   let thread = threadId ? await this.threadService.getThreadById(threadId) : null;
@@ -97,36 +96,24 @@ async handleUserMessage(content: string, threadId?: number) {
   // 2️⃣ Save user message
   await this.messagesService.createMessage(thread, Role.USER, content);
 
-  // 3️⃣ Single AI call to detect type and generate response
+  // 3️⃣ Use AI to classify and optionally generate product query
   const openaiResponse = await this.openai.chat.completions.create({
-    model: 'gpt-3.5-turbo',
+    model: 'gpt-4o-mini',
     messages: [
       {
-  role: 'system',
-  content: `
-You are a helpful AI health assistant. 
-- If the user query is about supplements, vitamins, medicines, or nutrition, always suggest product types. 
-- Reply in this format:
+        role: 'system',
+        content: `
+  content:
+      'You are a helpful doctor. Map user symptoms to supplements or medicines. Reply with single product name',
+ },
   TYPE: PRODUCT
-  CONTENT: <comma separated product names or supplement types>
-
-- If the query is purely conversational or general health advice, reply in this format:
+  CONTENT: <product name or supplement type>
+- If the user query is general conversation or greetings, reply with:
   TYPE: GENERAL
   CONTENT: <normal assistant response>
-- Do not ever reply "No products found" for supplement/medicine queries. 
-- Examples:
-  User: "Which multivitamins are best for women over 30?"
-  Reply:
-  TYPE: PRODUCT
-  CONTENT: multivitamins for women over 30
 
-  User: "Hello, how are you?"
-  Reply:
-  TYPE: GENERAL
-  CONTENT: "Hello! I am your AI assistant. How can I help you today?"
-  `
-},
-
+        `,
+      },
       { role: 'user', content },
     ],
   });
@@ -140,13 +127,14 @@ You are a helpful AI health assistant.
 
   let productMessage = '';
   let products: any[] = [];
-
+console.log('aicontent', aiContent )
   if (type === 'PRODUCT' && aiContent) {
-    // 4️⃣ Call SERP API for product links
+    // 4️⃣ Search through SERP API using AI-generated query
     const queryForSearch = encodeURIComponent(aiContent);
     const serpUrl = `https://serpapi.com/search.json?q=site:medxpharmacy.com ${queryForSearch}&api_key=${this.config.get<string>(
       'SERP_API_KEY',
     )}`;
+
     const { data } = await axios.get(serpUrl);
 
     // 5️⃣ Filter only medxpharmacy.com results
@@ -167,12 +155,10 @@ You are a helpful AI health assistant.
       }
     }
 
-    productMessage = products.length
-      ? products.map((p) => `${p.title} → ${p.link}`).join('\n')
-      : 'No products found.';
+    productMessage = products.map((p) => `${p.title} → ${p.link}`).join('\n');
   } else {
-    // 7️⃣ General AI response
-    productMessage = aiContent || '🤖 (No response)';
+    // 7️⃣ For GENERAL queries, respond with AI content directly
+    productMessage = aiContent || 'Hello! How can I help you today?';
   }
 
   // 8️⃣ Save assistant message
@@ -182,6 +168,7 @@ You are a helpful AI health assistant.
   return {
     threadId: thread.id,
     userQuery: content,
+    aiSuggestedQuery: aiContent,
     products,
     assistantReply: productMessage,
     responseType: type,
