@@ -18,13 +18,22 @@ import { FacialAnalysisModule } from './openai/facial-analysis/facial-analysis.m
       isGlobal: true,
     }),
    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: 'localhost',
-      port: 3306,
-      username: 'root',
-      password: 'RadhiMaithili7$',
-      database: 'medx_ai',
-      entities: [Message, Thread],
+      // type: 'mysql',
+      // host: 'localhost',
+      // port: 3306,
+      // username: 'root',
+      // password: 'RadhiMaithili7$',
+      // database: 'medx_ai',
+      // entities: [Message, Thread],
+      // synchronize: true,
+
+       type: 'postgres',   // change from 'mysql'
+      host: 'localhost',  // or your DB host
+      port: 5432,         // default postgres port
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
+      entities:  [Message, Thread],
       synchronize: true,
     }),
     OpenaiModule, // imports ThreadsModule and MessagesModule internally

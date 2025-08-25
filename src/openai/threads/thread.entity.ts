@@ -1,6 +1,23 @@
-import { Entity, PrimaryGeneratedColumn, OneToMany, CreateDateColumn, Column } from 'typeorm';
-import { Message } from '../messages/messages.entity';
+// import { Entity, PrimaryGeneratedColumn, OneToMany, CreateDateColumn, Column } from 'typeorm';
+// import { Message } from '../messages/messages.entity';
 
+
+// @Entity()
+// export class Thread {
+//   @PrimaryGeneratedColumn()
+//   id: number;
+
+//   @Column()
+//   title: string;
+
+//   @OneToMany(() => Message, message => message.thread)
+//   messages: Message[];
+// }
+
+
+
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn } from 'typeorm';
+import { Message } from '../messages/messages.entity';
 
 @Entity()
 export class Thread {
@@ -10,7 +27,7 @@ export class Thread {
   @Column()
   title: string;
 
-  @OneToMany(() => Message, message => message.thread)
+  @OneToMany(() => Message, (message) => message.thread)
   messages: Message[];
 }
 
