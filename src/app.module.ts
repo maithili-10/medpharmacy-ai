@@ -11,32 +11,39 @@ import { OpenaiModule } from './openai/openai.module';
 import { Message } from './openai/messages/messages.entity';
 import { Thread } from './openai/threads/thread.entity';
 import { FacialAnalysisModule } from './openai/facial-analysis/facial-analysis.module';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-   TypeOrmModule.forRoot({
-      // type: 'mysql',
-      // host: 'localhost',
-      // port: 3306,
-      // username: 'root',
-      // password: 'RadhiMaithili7$',
-      // database: 'medx_ai',
-      // entities: [Message, Thread],
-      // synchronize: true,
-
-       type: 'postgres',   // change from 'mysql'
-      host: 'localhost',  // or your DB host
-      port: 5432,         // default postgres port
-      username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
-      entities:  [Message, Thread],
-      synchronize: true,
+    TypeOrmModule.forRoot({
+     //for mySQL
+    // type: 'mysql',
+    // host: 'localhost',
+    // port: 3306,
+    // username: process.env.DB_USERNAME,
+    // password: process.env.DB_PASSWORD,
+    // database: process.env.DB_NAME,
+    // entities: [Message, Thread],
+     // synchronize: true,
+     
+    //  process.env.DB_USERNAME
+      
+    type: 'postgres',
+    host: 'dpg-d2lvoojuibrs73fm5ubg-a', // external hostname
+    port: 5432,
+    username: process.env.DB_USERNAME,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    entities: [Message, Thread],
+    synchronize: true,
+    ssl: true, // or: ssl: { rejectUnauthorized: false }
+      
     }),
     OpenaiModule, // imports ThreadsModule and MessagesModule internally
+    HealthModule,
     ChatModule,
       FacialAnalysisModule
   ],

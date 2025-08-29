@@ -1,19 +1,21 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, UsePipes, ValidationPipe } from '@nestjs/common';
 import { OpenaiService } from './openai.service';
+class SendMessageDto {
+  message!: string;
+  threadId?: number;
+}
 
 @Controller('openai')
 export class OpenaiController {
   constructor(private readonly openaiService: OpenaiService) {}
 
-  /**
-   * Send a user query to OpenAI and get assistant response
-   * Body: { query: string, threadId?: number }
-   */
   @Post('send')
-  async sendMessage(
-    @Body('query') query: string,
-    @Body('threadId') threadId?: number,
-  ) {
-    return this.openaiService.handleUserMessage(query, threadId);
+  @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }))
+  async sendMessage(@Body() body: { query?: string; threadId?: number }) {
+    // accept your current client payload { "query": "..." }
+    if (typeof body?.query !== 'string' || !body.query.trim()) {
+      throw new Error('`query` must be a non-empty string');
+    }
+    return this.openaiService.handleUserMessage(body.query, body.threadId);
   }
 }
