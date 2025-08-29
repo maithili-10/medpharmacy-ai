@@ -39,7 +39,7 @@ import { HealthModule } from './health/health.module';
     database: process.env.DB_NAME,
     entities: [Message, Thread],
     synchronize: true,
-    ssl: true, // or: ssl: { rejectUnauthorized: false }
+    ssl: false, // or: ssl: { rejectUnauthorized: false }
       
     }),
     OpenaiModule, // imports ThreadsModule and MessagesModule internally
